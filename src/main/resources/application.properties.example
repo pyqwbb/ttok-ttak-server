@@ -1,0 +1,5 @@
+# application.properties.example
+jdbc.driver=
+jdbc.url=
+jdbc.username=
+jdbc.password=
