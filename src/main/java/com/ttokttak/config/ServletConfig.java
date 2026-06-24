@@ -13,7 +13,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = "com.ttokttak.controller")
+@ComponentScan(basePackages = "com.ttokttak")
 public class ServletConfig implements WebMvcConfigurer {
 
     // JSON 응답 컨버터 등록
@@ -41,5 +41,12 @@ public class ServletConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/resources/**")
                 .addResourceLocations("/resources/");
+
+        // Swagger UI 리소스
+        registry.addResourceHandler("swagger-ui.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 }

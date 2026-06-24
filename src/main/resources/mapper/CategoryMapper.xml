@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ttokttak.dao.CategoryDao">
+    <select id="findAll" resultType="Category">
+        SELECT id, name, img, color, type
+        FROM CATEGORY
+        ORDER BY type, id
+    </select>
+
+    <select id="findByType" resultType="Category">
+        SELECT id, name, img, color, type
+        FROM CATEGORY
+        WHERE type = #{type}
+        ORDER BY id
+    </select>
+</mapper>
