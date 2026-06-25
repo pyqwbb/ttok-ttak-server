@@ -17,6 +17,7 @@ ext {
     log4jVersion = '2.20.0'
     mybatisVersion  = '3.5.13'
     jacksonVersion  = '2.15.2'
+    springSecurityVersion='5.8.13'
 }
 
 sourceCompatibility = '1.8'
@@ -61,6 +62,13 @@ dependencies {
     implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
     implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
     implementation "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
+
+    // 보안
+    implementation("org.springframework.security:spring-security-web:${springSecurityVersion}")
+    implementation("org.springframework.security:spring-security-config:${springSecurityVersion}")
+    implementation("org.springframework.security:spring-security-core:${springSecurityVersion}")
+    implementation("org.springframework.security:spring-security-taglibs:${springSecurityVersion}")
+    implementation("org.springframework.security:spring-security-crypto:${springSecurityVersion}")
 }
 
 test {

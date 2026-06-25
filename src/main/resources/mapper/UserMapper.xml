@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ttokttak.dao.UserDao">
+
+    <select id="findByEmail" resultType="User">
+        SELECT id, email, password, nickname, profile_img, provider, provider_id, created_at
+        FROM `USER`
+        WHERE email = #{email}
+    </select>
+
+    <select id="existsByNickname" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM `USER`
+        WHERE nickname = #{nickname}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO `USER` (id, email, password, nickname, profile_img, provider)
+        VALUES (#{id}, #{email}, #{password}, #{nickname}, #{profileImg}, #{provider})
+    </insert>
+
+</mapper>
