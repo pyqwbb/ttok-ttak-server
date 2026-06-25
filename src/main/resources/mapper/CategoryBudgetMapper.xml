@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ttokttak.dao.CategoryBudgetDao">
+    <select id="findByUid" resultType="CategoryBudget">
+        SELECT id, uid, cid, amount
+        FROM CATEGORY_BUDGET
+        WHERE uid = #{uid}
+        ORDER BY cid
+    </select>
+
+    <insert id="insert">
+        INSERT INTO CATEGORY_BUDGET (id, uid, cid, amount)
+        VALUES (#{id}, #{uid}, #{cid}, #{amount})
+    </insert>
+
+    <update id="update">
+        UPDATE CATEGORY_BUDGET
+        SET amount = #{amount}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM CATEGORY_BUDGET WHERE id = #{id}
+    </delete>
+</mapper>
