@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ttokttak.dao.BudgetDao">
+    <select id="findAll" resultType="Budget">
+        SELECT id, uid, date, title, type, cid, amount, memo
+        FROM BUDGET
+        WHERE uid = #{uid}
+        <if test="type != null">AND type = #{type}</if>
+        <if test="cid != null">AND cid = #{cid}</if>
+        <if test="startDate != null">AND date >= #{startDate}</if>
+        <if test="endDate != null">AND date &lt;= #{endDate}</if>
+        ORDER BY date DESC
+    </select>
+
+    <select id="findById" resultType="Budget">
+        SELECT id, uid, date, title, type, cid, amount, memo
+        FROM BUDGET
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO BUDGET (id, uid, date, title, type, cid, amount, memo)
+        VALUES (#{id}, #{uid}, #{date}, #{title},#{type}, #{cid}, #{amount}, #{memo})
+    </insert>
+
+    <update id="update">
+        UPDATE BUDGET
+        SET date   = #{date},
+            title  = #{title},
+            type   = #{type},
+            cid    = #{cid},
+            amount = #{amount},
+            memo   = #{memo}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM BUDGET WHERE id = #{id}
+    </delete>
+</mapper>
