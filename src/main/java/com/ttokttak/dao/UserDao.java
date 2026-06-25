@@ -1,8 +1,10 @@
 package com.ttokttak.dao;
 
 import com.ttokttak.domain.User;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+@Mapper
 public interface UserDao {
     // 이메일로 유저 조회 (중복 체크용)
     User findByEmail(@Param("email") String email);
