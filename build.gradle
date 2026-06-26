@@ -15,9 +15,10 @@ ext {
     springVersion = '5.3.27'
     lombokVersion = '1.18.30'
     log4jVersion = '2.20.0'
-    mybatisVersion  = '3.5.13'
-    jacksonVersion  = '2.15.2'
-    springSecurityVersion='5.8.13'
+    mybatisVersion = '3.5.13'
+    jacksonVersion = '2.15.2'
+    springSecurityVersion = '5.8.13'
+    jjwtVersion = '0.11.5'
 }
 
 sourceCompatibility = '1.8'
@@ -69,6 +70,11 @@ dependencies {
     implementation("org.springframework.security:spring-security-core:${springSecurityVersion}")
     implementation("org.springframework.security:spring-security-taglibs:${springSecurityVersion}")
     implementation("org.springframework.security:spring-security-crypto:${springSecurityVersion}")
+
+    // JWT
+    implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+    implementation "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
 }
 
 test {
