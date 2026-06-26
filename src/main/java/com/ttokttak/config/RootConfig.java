@@ -18,7 +18,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @PropertySource("classpath:application.properties")
-@ComponentScan(basePackages = "com.ttokttak.service")
+@ComponentScan(basePackages = "com.ttokttak")
 @MapperScan(basePackages = "com.ttokttak.dao")
 public class RootConfig {
     @Value("${jdbc.driver}")
