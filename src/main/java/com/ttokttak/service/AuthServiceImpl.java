@@ -2,7 +2,9 @@ package com.ttokttak.service;
 
 import com.ttokttak.dao.UserDao;
 import com.ttokttak.domain.User;
+import com.ttokttak.dto.LoginRequest;
 import com.ttokttak.dto.SignupRequest;
+import com.ttokttak.util.JwtUtil;
 import com.ttokttak.util.UserValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +18,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserDao userDao;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Override
     public void signup(SignupRequest req) {
@@ -42,5 +45,30 @@ public class AuthServiceImpl implements AuthService {
         user.setProvider("local");
 
         userDao.insert(user);
+    }
+
+    @Override
+    public String login(LoginRequest req) {
+        // 필수값 체크
+        if (req.getEmail() == null || req.getEmail().isBlank()) {
+            throw new IllegalArgumentException("이메일을 입력해주세요.");
+        }
+        if (req.getPassword() == null || req.getPassword().isBlank()) {
+            throw new IllegalArgumentException("비밀번호를 입력해주세요.");
+        }
+
+        // 유저 조회
+        User user = userDao.findByEmail(req.getEmail());
+        if (user == null) {
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않아요.");
+        }
+
+        // 비밀번호 검증
+        if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않아요.");
+        }
+
+        // JWT 발급
+        return jwtUtil.generateToken(user.getId());
     }
 }

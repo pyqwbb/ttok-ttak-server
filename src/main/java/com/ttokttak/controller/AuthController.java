@@ -1,5 +1,6 @@
 package com.ttokttak.controller;
 
+import com.ttokttak.dto.LoginRequest;
 import com.ttokttak.dto.SignupRequest;
 import com.ttokttak.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,19 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // POST /api/auth/login
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        try {
+            String token = authService.login(req);
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", e.getMessage()));
         }
     }
