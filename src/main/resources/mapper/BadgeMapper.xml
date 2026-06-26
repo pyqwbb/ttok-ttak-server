@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ttokttak.dao.BadgeDao">
+
+    <!--
+        월별 지출 빈도 1위 카테고리 조회 (최대 6개월치)
+        1. BUDGET에서 월별/카테고리별 지출 횟수 집계
+        2. 각 월에서 횟수가 가장 많은 카테고리만 추출
+        3. 최근 6개월치만 반환
+    -->
+    <select id="findMonthlyTopCategory" resultType="map">
+        SELECT
+            t.month,
+            t.cid,
+            c.name  AS categoryName,
+            c.img   AS categoryImg,
+            c.color AS categoryColor,
+            t.cnt   AS count
+        FROM (
+                 SELECT
+                     DATE_FORMAT(date, '%Y-%m') AS month,
+                     cid,
+                     COUNT(*)                   AS cnt,
+                     RANK() OVER (
+                         PARTITION BY DATE_FORMAT(date, '%Y-%m')
+                         ORDER BY COUNT(*) DESC
+                         ) AS rnk
+                 FROM BUDGET
+                 WHERE uid  = #{uid}
+                   AND type = 'expense'
+                 GROUP BY DATE_FORMAT(date, '%Y-%m'), cid
+             ) t
+                 JOIN CATEGORY c ON c.id = t.cid
+        WHERE t.rnk = 1
+        ORDER BY t.month DESC
+        LIMIT 6
+    </select>
+</mapper>
