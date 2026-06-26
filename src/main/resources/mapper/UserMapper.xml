@@ -3,6 +3,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.ttokttak.dao.UserDao">
+    <select id="findById" resultType="User">
+        SELECT id, email, nickname, profile_img, provider, created_at
+        FROM `USER`
+        WHERE id = #{id}
+    </select>
 
     <select id="findByEmail" resultType="User">
         SELECT id, email, password, nickname, profile_img, provider, provider_id, created_at
@@ -16,9 +21,30 @@
         WHERE nickname = #{nickname}
     </select>
 
+    <select id="existsByEmailExcludeMe" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM `USER`
+        WHERE email = #{email}
+          AND id != #{id}
+    </select>
+
+    <select id="existsByNicknameExcludeMe" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM `USER`
+        WHERE nickname = #{nickname}
+          AND id != #{id}
+    </select>
+
     <insert id="insert">
         INSERT INTO `USER` (id, email, password, nickname, profile_img, provider)
         VALUES (#{id}, #{email}, #{password}, #{nickname}, #{profileImg}, #{provider})
     </insert>
 
+    <update id="update">
+        UPDATE `USER`
+        SET nickname    = #{nickname},
+            email       = #{email},
+            profile_img = #{profileImg}
+        WHERE id = #{id}
+    </update>
 </mapper>
