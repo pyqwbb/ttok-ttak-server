@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,24 +20,25 @@ public class BudgetController {
 
     private final BudgetService budgetService;
 
-    // 임시 고정 uid — JWT 구현 후 교체 예정
-    private static final String TEMP_UID = "a63ec1eb";
-
     // GET /api/budget
     // GET /api/budget?type=expense&cid=1&startDate=2026-06-01&endDate=2026-06-30
     @GetMapping
     public ResponseEntity<List<Budget>> getAll(
+            HttpServletRequest request,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) Integer cid,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate
     ) {
+        String uid = (String) request.getAttribute("uid");
+
         Map<String, Object> params = new HashMap<>();
-        params.put("uid", TEMP_UID);
+        params.put("uid", uid);
         params.put("type", type);
         params.put("cid", cid);
         params.put("startDate", startDate);
         params.put("endDate", endDate);
+
         return ResponseEntity.ok(budgetService.getAll(params));
     }
 
@@ -48,8 +50,12 @@ public class BudgetController {
 
     // POST /api/budget
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody BudgetRequest req) {
-        budgetService.create(TEMP_UID, req);
+    public ResponseEntity<?> create(
+            HttpServletRequest request,
+            @RequestBody BudgetRequest req
+    ) {
+        String uid = (String) request.getAttribute("uid");
+        budgetService.create(uid, req);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("message", "거래가 등록됐어요."));
     }

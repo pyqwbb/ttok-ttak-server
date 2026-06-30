@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -22,9 +23,6 @@ public class GamificationController {
     private final ReactionMessageService reactionMessageService;
     private final MonthlySummaryMessageService monthlySummaryMessageService;
     private final BadgeService badgeService;
-
-    // 임시 고정 uid — JWT 구현 후 교체 예정
-    private static final String TEMP_UID = "a63ec1eb";
 
     // GET /api/reaction-messages
     @GetMapping("/reaction-messages")
@@ -40,7 +38,8 @@ public class GamificationController {
 
     // GET /api/badges
     @GetMapping("/badges")
-    public ResponseEntity<List<Map<String, Object>>> getBadges() {
-        return ResponseEntity.ok(badgeService.getMonthlyBadges(TEMP_UID));
+    public ResponseEntity<List<Map<String, Object>>> getBadges(HttpServletRequest request) {
+        String uid = (String) request.getAttribute("uid");
+        return ResponseEntity.ok(badgeService.getMonthlyBadges(uid));
     }
 }

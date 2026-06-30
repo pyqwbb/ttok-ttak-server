@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -18,19 +19,21 @@ public class CategoryBudgetController {
 
     private final CategoryBudgetService categoryBudgetService;
 
-    // 임시 고정 uid — JWT 구현 후 교체 예정
-    private static final String TEMP_UID = "a63ec1eb";
-
     // GET /api/category-budget
     @GetMapping
-    public ResponseEntity<List<CategoryBudget>> getAll() {
-        return ResponseEntity.ok(categoryBudgetService.getAll(TEMP_UID));
+    public ResponseEntity<List<CategoryBudget>> getAll(HttpServletRequest request) {
+        String uid = (String) request.getAttribute("uid");
+        return ResponseEntity.ok(categoryBudgetService.getAll(uid));
     }
 
     // POST /api/category-budget
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody CategoryBudgetRequest req) {
-        categoryBudgetService.create(TEMP_UID, req);
+    public ResponseEntity<?> create(
+            HttpServletRequest request,
+            @RequestBody CategoryBudgetRequest req
+    ) {
+        String uid = (String) request.getAttribute("uid");
+        categoryBudgetService.create(uid, req);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("message", "예산이 등록됐어요."));
     }

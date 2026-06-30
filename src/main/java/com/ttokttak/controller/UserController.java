@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 @RestController
@@ -16,21 +17,23 @@ public class UserController {
 
     private final UserService userService;
 
-    // 임시 고정 uid — JWT 구현 후 교체 예정
-    private static final String TEMP_UID = "a63ec1eb";
-
     // GET /api/user
     @GetMapping
-    public ResponseEntity<User> getUser() {
-        return ResponseEntity.ok(userService.getUser(TEMP_UID));
+    public ResponseEntity<User> getUser(HttpServletRequest request) {
+        String uid = (String) request.getAttribute("uid");
+        return ResponseEntity.ok(userService.getUser(uid));
     }
 
     // PATCH /api/user
     @PatchMapping
-    public ResponseEntity<?> updateUser(@RequestBody UpdateUserRequest req) {
+    public ResponseEntity<?> updateUser(
+            HttpServletRequest request,
+            @RequestBody UpdateUserRequest req
+    ) {
         try {
-            userService.updateUser(TEMP_UID, req);
-            return ResponseEntity.ok(userService.getUser(TEMP_UID));
+            String uid = (String) request.getAttribute("uid");
+            userService.updateUser(uid, req);
+            return ResponseEntity.ok(userService.getUser(uid));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", e.getMessage()));
