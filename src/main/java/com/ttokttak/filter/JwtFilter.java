@@ -1,6 +1,8 @@
 package com.ttokttak.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ttokttak.util.JwtUtil;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -9,71 +11,87 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class JwtFilter implements Filter {
 
     private JwtUtil jwtUtil;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    // 인증 불필요 경로
+    // 인증 불필요 경로 (Ant 패턴 사용 가능: /** 등)
     private static final List<String> WHITELIST = List.of(
             "/api/auth/signup",
             "/api/auth/login",
             "/oauth2/authorization/kakao",
             "/login/oauth2/code/kakao",
             "/swagger-ui.html",
-            "/swagger-resources",
+            "/swagger-resources/**",
             "/v2/api-docs",
-            "/webjars"
+            "/webjars/**"
     );
 
     @Override
     public void init(FilterConfig filterConfig) {
-        // Spring 빈을 서블릿 필터에서 가져오는 방법
         WebApplicationContext ctx = WebApplicationContextUtils
                 .getWebApplicationContext(filterConfig.getServletContext());
-        this.jwtUtil = Objects.requireNonNull(ctx).getBean(JwtUtil.class);
+        this.jwtUtil = Objects.requireNonNull(ctx, "WebApplicationContext가 초기화되지 않았어요.")
+                .getBean(JwtUtil.class);
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest req  = (HttpServletRequest)  servletRequest;
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
+
+        HttpServletRequest req = (HttpServletRequest) servletRequest;
         HttpServletResponse resp = (HttpServletResponse) servletResponse;
 
-        String path = req.getRequestURI();
-
-        // 화이트리스트 경로는 토큰 검사 없이 통과
-        boolean isWhitelisted = WHITELIST.stream()
-                .anyMatch(path::startsWith);
-
-        if (isWhitelisted) {
+        // 1. CORS 프리플라이트(OPTIONS)는 무조건 통과 — 토큰이 없으므로 검사 대상이 아님
+        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
-        // Authorization 헤더에서 토큰 추출
-        String header = req.getHeader("Authorization");
+        String path = req.getRequestURI();
 
-        if (header == null || !header.startsWith("Bearer ")) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            resp.setContentType("application/json;charset=UTF-8");
-            resp.getWriter().write("{\"message\": \"로그인이 필요해요.\"}");
+        // 2. 화이트리스트는 JWT 검사 없이 통과 (Ant 패턴 매칭)
+        if (isWhitelisted(path)) {
+            filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
-        String token = header.substring(7);
+        // 3. Authorization 헤더 체크
+        String header = req.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            writeError(resp, HttpServletResponse.SC_UNAUTHORIZED, "로그인이 필요해요.");
+            return;
+        }
+
+        String token = header.substring(7).trim();
 
         if (!jwtUtil.isValid(token)) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            resp.setContentType("application/json;charset=UTF-8");
-            resp.getWriter().write("{\"message\": \"유효하지 않은 토큰이에요.\"}");
+            writeError(resp, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰이에요.");
             return;
         }
 
-        // 토큰에서 userId 꺼내서 요청에 저장
-        String userId = jwtUtil.getUserId(token);
-        req.setAttribute("uid", userId);
-
+        // 4. 유저 정보 저장 후 다음 필터로
+        req.setAttribute("uid", jwtUtil.getUserId(token));
         filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    private boolean isWhitelisted(String path) {
+        return WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
+    }
+
+    private void writeError(HttpServletResponse resp, int status, String message) throws IOException {
+        resp.setStatus(status);
+        resp.setContentType("application/json;charset=UTF-8");
+        objectMapper.writeValue(resp.getWriter(), Map.of("message", message));
+    }
+
+    @Override
+    public void destroy() {
+        // 정리할 리소스 없음
     }
 }

@@ -16,33 +16,34 @@ import java.util.List;
 @ComponentScan(basePackages = "com.ttokttak")
 public class ServletConfig implements WebMvcConfigurer {
 
+    // 프론트 개발 서버 출처 (운영 배포 시 도메인으로 교체/추가 필요)
+    private static final String[] ALLOWED_ORIGINS = {
+            "http://localhost:5173"
+    };
+
     // JSON 응답 컨버터 등록
-    // @RestController에서 객체를 반환할 때 JSON으로 변환해줌
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(new MappingJackson2HttpMessageConverter());
     }
 
-    // CORS 설정
-    // Vue 개발 서버(5173)에서 Spring 서버(8080)로 요청할 때 막히지 않도록 허용
+    // CORS 설정 — 모든 /api/** 요청에 대해 허용 출처/메서드/헤더 지정
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:5173")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedOrigins(ALLOWED_ORIGINS)
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
     }
 
     // 정적 리소스 핸들러
-    // /resources/** 경로 요청을 DispatcherServlet이 가로채지 않도록 처리
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/resources/**")
                 .addResourceLocations("/resources/");
 
-        // Swagger UI 리소스
         registry.addResourceHandler("swagger-ui.html")
                 .addResourceLocations("classpath:/META-INF/resources/");
 
