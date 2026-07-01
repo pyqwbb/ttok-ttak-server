@@ -55,6 +55,12 @@ public class RootConfig {
                 applicationContext.getResources("classpath:/mapper/**/*Mapper.xml")
         );
         factoryBean.setTypeAliasesPackage("com.ttokttak.domain");
+
+        org.apache.ibatis.session.Configuration mybatisConfig =
+                new org.apache.ibatis.session.Configuration();
+        mybatisConfig.setMapUnderscoreToCamelCase(true);
+        factoryBean.setConfiguration(mybatisConfig);
+
         return factoryBean;
     }
 
